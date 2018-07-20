@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>hello</title>
+		<script src="js/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" charset="utf-8">
+
+			function showPosition_old(position) {
+				var lat = position.coords.latitude; 
+				var lag = position.coords.longitude; 
+				alert(lat + ', ' + lag);
+			}
+
+			function showError(error) {
+				switch(error.code) {
+					case error.PERMISSION_DENIED:
+						alert("failure, refuse");
+						break;
+					case error.POSITION_UNAVAILABLE:
+						alert("failure, localtion can not be use");
+						break;
+					case error.TIMEOUT:
+						alert("failure, timeout");
+						break;
+					case error.UNKNOWN_ERROR:
+						alert("failure, UNKNOWN_ERROR");
+						break;
+				}
+			}
+
+			function getLocation() {
+				if(navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(showPosition, showError);
+				} else {
+					alert("Browser does not support geolocation");
+				}
+			}
+
+			function showPosition(position) {
+				var latlon = position.coords.latitude + ',' + position.coords.longitude;
+
+				// use google map get localtion info  
+				var url = 'http://maps.google.cn/maps/api/geocode/json?latlng=' + latlon + '&language=CN';
+				$.ajax({
+					type: "GET",
+					url: url,
+					beforeSend: function() {
+						$("#google_geo").html('Positioning...');
+					},
+					success: function(json) {
+						if(json.status == 'OK') {
+							var results = json.results;
+							$.each(results, function(index, array) {
+								if(index == 0) {
+									$("#google_geo").html(array['formatted_address']);
+								}
+							});
+						}
+					},
+					error: function(XMLHttpRequest, textStatus, errorThrown) {
+						$("#google_geo").html(latlon + " location acquisition failure");
+					}
+				});
+			}
+			getLocation();
+		</script>
+	</head>
+
+	<body>
+		<div id="google_geo"></div>
+	</body>
+
+</html>
